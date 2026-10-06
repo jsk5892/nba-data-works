@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="Joshua Kratt's NBA rankings, season predictions, and draft big board.">
+<meta property="og:title" content="NBA Data Works">
+<meta property="og:description" content="Joshua Kratt's NBA rankings, season predictions, and draft big board.">
+<meta property="og:type" content="website">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NBA Data Works · Top 30</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --page:#F3F4F1; --surface:#FFFFFF; --surface-2:#ECEEEA; --border:#D3D6D0; --rule:#E5E7E2;
+  --ink:#14161B; --muted:#5A5F67; --faint:#7D838C;
+  --bar:#14161B; --bar-ink:#F3F4F1; --bar-dim:#8B9099; --bar-tab:#262A31;
+  --paint:#1F4BA5; --ball:#E2581B; --up:#12804F; --down:#C4352A; --near:#346EB8;
+  --line-faint:#CDD1CB;
+  --m1:#DDB078; --m2:#D3A46C; --m3:#CB9A61; --seam:rgba(96,58,22,.28); --grain:rgba(110,70,30,.035);
+  --floor-head:#1A3F8E; --floor-ink:#1D1610; --floor-muted:#3D2E1E; --court:rgba(255,255,255,.8);
+  --font:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  --maxw:1100px;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --page:#111317; --surface:#191C21; --surface-2:#22262D; --border:#2F343C; --rule:#252930;
+    --ink:#EEF0F2; --muted:#A1A8B1; --faint:#6B727C;
+    --bar:#1D2027; --bar-ink:#EEF0F2; --bar-dim:#8B929C; --bar-tab:#2A2F37;
+    --paint:#7AA2EE; --ball:#F27236; --up:#3CC487; --down:#F06A5E; --near:#6FA4E6;
+    --line-faint:#343A43;
+    --m1:#7E5A39; --m2:#755335; --m3:#6C4C30; --seam:rgba(0,0,0,.35); --grain:rgba(0,0,0,.08);
+    --floor-head:#FFF4E4; --floor-ink:#FFF4E4; --floor-muted:#E6D2B8; --court:rgba(255,255,255,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --page:#111317; --surface:#191C21; --surface-2:#22262D; --border:#2F343C; --rule:#252930;
+  --ink:#EEF0F2; --muted:#A1A8B1; --faint:#6B727C;
+  --bar:#1D2027; --bar-ink:#EEF0F2; --bar-dim:#8B929C; --bar-tab:#2A2F37;
+  --paint:#7AA2EE; --ball:#F27236; --up:#3CC487; --down:#F06A5E; --near:#6FA4E6;
+  --line-faint:#343A43;
+  --m1:#7E5A39; --m2:#755335; --m3:#6C4C30; --seam:rgba(0,0,0,.35); --grain:rgba(0,0,0,.08);
+  --floor-head:#FFF4E4; --floor-ink:#FFF4E4; --floor-muted:#E6D2B8; --court:rgba(255,255,255,.4);
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 70px);overflow-x:clip}
+body{margin:0;background:var(--page);color:var(--ink);font:400 16px/1.55 var(--font);-webkit-font-smoothing:antialiased;overflow-x:clip}
+button{font:inherit;color:inherit}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--ball);outline-offset:2px}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+/* shared type voices: wide for headlines, narrow for numbers */
+.hero h1,h2,.brand,.placeholder h1,.panel h3,.conf h3,.awh,.movers h3{font-family:var(--font);font-stretch:125%;font-weight:850}
+.rk,.ps,.mv,.stats b,.psum b,.tstat b,.tyr,.pr b,.hero .path b,.hist td:nth-child(2),.tbar span,.yearbar button{font-family:var(--font);font-stretch:70%;font-variant-numeric:tabular-nums}
+
+/* ===== top bar: scoreboard band with square tabs ===== */
+.topbar{position:sticky;top:0;z-index:20;background:var(--bar);color:var(--bar-ink);padding-top:env(safe-area-inset-top,0px)}
+.topbar .wrap{display:flex;align-items:center;gap:24px;height:60px}
+.brand{font-size:17px;letter-spacing:.01em;white-space:nowrap;display:flex;align-items:center;gap:10px}
+.brand svg{flex:none}
+nav.sections{display:flex;gap:3px;min-width:0;overflow-x:auto;scrollbar-width:none;margin-left:auto;align-self:stretch;align-items:stretch;padding:10px 0}
+nav.sections::-webkit-scrollbar{display:none}
+nav.sections a{display:flex;align-items:center;gap:8px;padding:0 16px;border-radius:0;background:var(--bar-tab);color:var(--bar-ink);text-decoration:none;font-size:14px;font-weight:650;white-space:nowrap}
+nav.sections a:hover{background:#3A3F48}
+nav.sections a[aria-current="page"]{background:var(--ball);color:#fff}
+nav.sections a.soon{color:var(--bar-dim)}
+nav.sections a.soon span{font-size:11px;font-weight:600;background:var(--bar);color:var(--bar-dim);padding:2px 6px}
+
+/* ===== hero: the floor ===== */
+.hero{position:relative;isolation:isolate;padding:64px 0 52px;color:var(--floor-ink)}
+.hero::before{content:"";position:absolute;inset:0 calc(50% - 50vw);z-index:-2;
+  background:
+    repeating-linear-gradient(90deg, var(--grain) 0 1px, transparent 1px 9px, var(--grain) 9px 10px, transparent 10px 23px),
+    repeating-linear-gradient(180deg, transparent 0 41px, var(--seam) 41px 42px),
+    repeating-linear-gradient(180deg, var(--m1) 0 42px, var(--m2) 42px 84px, var(--m3) 84px 126px, var(--m2) 126px 168px, var(--m1) 168px 210px, var(--m3) 210px 252px);
+  border-bottom:6px solid var(--paint)}
+.hero::after{content:"";position:absolute;top:0;bottom:0;right:calc(50% - 50vw);width:min(900px,80vw);z-index:-1;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.6 32.8 51.2' preserveAspectRatio='xMaxYMid meet'%3E%3Cg fill='none' stroke='white' stroke-width='0.34'%3E%3Cpath d='M32 -2V52M-40 0H32M-40 50H32'/%3E%3Cpath d='M32 3H17.8A23.75 23.75 0 0 0 17.8 47H32'/%3E%3Crect x='13' y='17' width='19' height='16'/%3E%3Cpath d='M13 19A6 6 0 0 0 13 31'/%3E%3Cpath d='M13 19A6 6 0 0 1 13 31' stroke-dasharray='1.1 0.9'/%3E%3Cpath d='M28 21H26.75A4 4 0 0 0 26.75 29H28'/%3E%3Cpath d='M25 16.3V17M24 16V17M21 16.3V17M18 16.3V17M15 16.3V17M25 33V33.7M24 33V34M21 33V33.7M18 33V33.7M15 33V33.7'/%3E%3Cpath d='M28 22V28' stroke-width='0.5'/%3E%3Ccircle cx='26.75' cy='25' r='0.75' stroke-width='0.28'/%3E%3C/g%3E%3C/svg%3E") right center/auto 100% no-repeat;opacity:.7}
+.hero h1{font-size:clamp(42px,7.4vw,96px);line-height:.92;margin:0;letter-spacing:-.015em;max-width:13ch;color:var(--floor-head);text-wrap:balance}
+.hero p strong{color:var(--floor-ink);font-weight:750}
+.hero p{margin:22px 0 0;color:var(--floor-muted);font-size:18px;font-weight:500;max-width:52ch}
+.hero .path{display:flex;gap:3px;margin-top:26px;flex-wrap:wrap}
+.hero .path span{display:flex;align-items:baseline;gap:10px;padding:9px 14px;background:var(--bar);color:var(--bar-dim);font-size:13px;font-weight:600}
+.hero .path span b{font-size:24px;line-height:1;color:var(--bar-ink);font-weight:800}
+.hero .path span.now{background:var(--ball);color:#FFE7DA}
+.hero .path span.now b{color:#fff}
+
+/* ===== sections ===== */
+section.block{padding:56px 0 8px}
+h2{font-size:clamp(28px,3.6vw,40px);line-height:1;margin:0 0 10px;letter-spacing:-.01em}
+.lede{color:var(--muted);margin:0 0 26px;max-width:60ch}
+
+/* segmented season control */
+.yearbar{display:inline-flex;flex-wrap:wrap;gap:0;margin-bottom:24px;border:1px solid var(--ink)}
+.yearbar button{border:0;border-right:1px solid var(--border);background:var(--surface);padding:10px 16px;font-size:20px;font-weight:800;cursor:pointer;color:var(--muted)}
+.yearbar button:last-child{border-right:0}
+.yearbar button:hover{color:var(--ink)}
+.yearbar button[aria-pressed="true"]{background:var(--ink);color:var(--page)}
+.board-note{font-size:14px;color:var(--muted);margin:-8px 0 16px}
+
+/* board */
+.board{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;list-style:none;margin:0;padding:0}
+.board li{border-bottom:1px solid var(--rule)}
+.board ol li:first-child{border-top:2px solid var(--ink)}
+.board button.row{all:unset;box-sizing:border-box;display:grid;grid-template-columns:46px 1fr auto;align-items:center;gap:12px;width:100%;padding:8px 8px 8px 0;cursor:pointer}
+.board button.row:hover{background:var(--surface)}
+.board button.row:hover .nm{color:var(--paint)}
+.board button.row:focus-visible{outline:2px solid var(--ball);outline-offset:-2px}
+.rk{font-size:30px;font-weight:800;line-height:1;text-align:right;color:var(--faint)}
+.board li.top .rk{color:var(--ink)}
+.board li.top1 .rk{color:var(--ball)}
+.nm{font-weight:600;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mv{font-size:16px;font-weight:800;line-height:1;min-width:44px;text-align:right}
+.mv.up{color:var(--up)} .mv.down{color:var(--down)} .mv.same{color:var(--faint)} .mv.new{color:var(--paint);font-size:13px;font-stretch:100%;font-weight:700}
+.extra{margin-top:20px}
+.extra summary{cursor:pointer;color:var(--muted);font-size:14px;font-weight:600}
+.extra .board{margin-top:10px}
+.dropped{margin-top:22px;font-size:14px;color:var(--muted);max-width:80ch}
+.dropped b{color:var(--ink);font-weight:700}
+.dropped button{all:unset;cursor:pointer;color:var(--ink);font-weight:600;text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:3px}
+.dropped button:hover{text-decoration-color:var(--ball)}
+
+/* chips: square tags */
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:14px}
+.chips button{border:1px solid var(--border);background:var(--surface);padding:6px 10px;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);display:flex;align-items:center;gap:7px}
+.chips button i{width:10px;height:10px;background:var(--line-faint)}
+.chips button:hover{color:var(--ink)}
+.chips button[aria-pressed="true"]{color:var(--ink);border-color:var(--ink)}
+.chips .clear{border-style:dashed}
+.chart-scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--ink)}
+#bump{display:block;min-width:720px;width:100%;height:auto}
+#bump text{font-family:var(--font)}
+#bump .yr{font-size:19px;font-weight:800;font-stretch:70%;fill:var(--ink)}
+#bump .rnum{font-size:11px;fill:var(--faint);font-stretch:70%}
+#bump .grid{stroke:var(--rule)}
+#bump .lab{font-size:12px;font-weight:700}
+#bump .ln{fill:none;stroke-linecap:round;stroke-linejoin:round;cursor:pointer}
+#bump .ln.bg{stroke:var(--line-faint);stroke-width:1.5}
+#bump .ln.hl{stroke-width:3.5}
+#bump .hit{fill:none;stroke:transparent;stroke-width:12;cursor:pointer}
+.chart-tip{font-size:13px;color:var(--muted);margin:10px 0 0}
+
+/* movers */
+.movers{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.movers > div{border-top:4px solid var(--ink);padding-top:14px}
+.movers > div:nth-child(1){border-color:var(--up)}
+.movers > div:nth-child(2){border-color:var(--down)}
+.movers h3{font-size:20px;line-height:1.1;margin:0 0 4px}
+.movers .sub{font-size:14px;color:var(--muted);margin:0 0 10px}
+.movers ol{list-style:none;margin:0;padding:0}
+.movers li{border-top:1px solid var(--rule)}
+.movers button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;justify-content:space-between;align-items:baseline;gap:10px;width:100%;padding:9px 0;font-size:15px}
+.movers button:hover .who{color:var(--paint)}
+.movers .who{font-weight:600}
+.movers .det{color:var(--muted);font-size:13px;white-space:nowrap}
+.movers .det b{font-size:17px;font-stretch:70%;font-weight:800;margin-left:4px}
+
+footer{margin-top:56px;padding:28px 0 60px;background:var(--bar);color:var(--bar-dim);font-size:14px}
+footer p{max-width:72ch;margin:0}
+
+/* player panel */
+.scrim{position:fixed;inset:0;background:rgba(10,12,16,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;right:0;bottom:0;width:min(440px,100%);background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column;padding-bottom:env(safe-area-inset-bottom,0px)}
+.panel.open{transform:none}
+.panel header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 28px) 24px 18px;
+  background:repeating-linear-gradient(180deg, transparent 0 29px, var(--seam) 29px 30px), repeating-linear-gradient(180deg, var(--m1) 0 30px, var(--m2) 30px 60px, var(--m3) 60px 90px);
+  border-bottom:5px solid var(--paint)}
+.panel h3{font-size:34px;line-height:.95;margin:0;color:var(--floor-head);letter-spacing:-.01em}
+.panel .close{border:0;background:var(--bar);color:var(--bar-ink);width:38px;height:38px;cursor:pointer;font-size:16px;flex:none;align-self:flex-start}
+.panel .body{padding:20px 24px 28px;overflow-y:auto}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin:0 0 20px}
+.stats div{background:var(--bar);color:var(--bar-dim);padding:12px}
+.stats b{display:block;font-size:34px;font-weight:800;line-height:1;color:var(--bar-ink)}
+.stats span{font-size:12px}
+.hist{width:100%;border-collapse:collapse;font-size:15px}
+.hist th{text-align:left;font-weight:600;color:var(--muted);font-size:13px;padding:6px 0;border-bottom:2px solid var(--ink)}
+.hist td{padding:8px 0;border-bottom:1px solid var(--rule)}
+.hist td:nth-child(2){font-size:22px;font-weight:800}
+.hist td:last-child{text-align:right}
+.panel .spark{margin:0 0 18px;background:var(--surface-2)}
+.panel .spark text{font:700 11px var(--font);fill:var(--muted)}
+
+.placeholder{padding:88px 0;max-width:56ch}
+.placeholder h1{font-size:56px;line-height:.92;margin:0 0 16px}
+.placeholder p{color:var(--muted)}
+
+/* ===== predictions ===== */
+.psum{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:28px}
+.psum div{background:var(--bar);color:var(--bar-dim);padding:14px 16px}
+.psum b{display:block;font-size:34px;font-weight:800;line-height:1;color:var(--bar-ink)}
+.psum div:last-child b{color:var(--ball)}
+.psum span{font-size:13px}
+.confs{display:grid;grid-template-columns:1fr 1fr;gap:40px}
+.conf h3,.awh{font-size:20px;line-height:1;margin:0 0 10px}
+.awh{margin-top:40px}
+.conf ol{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.prow{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:12px;padding:9px 10px 9px 8px;border-bottom:1px solid var(--rule);border-left:5px solid transparent}
+.prow.exact{border-left-color:var(--up)} .prow.near{border-left-color:var(--near)} .prow.in{border-left-color:var(--line-faint)} .prow.miss{border-left-color:var(--down)}
+.ps{font-size:26px;font-weight:800;line-height:1;text-align:right;color:var(--muted)}
+.pt{font-weight:600}
+.prow.miss .pt{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--down)}
+.pr{display:flex;align-items:center;gap:10px;font-size:13px}
+.pr b{font-size:22px;font-weight:800;line-height:1;min-width:16px;text-align:right}
+.pr .tag{font-weight:600;color:var(--muted)}
+.prow.exact .tag{color:var(--up)} .prow.near .tag{color:var(--near)} .prow.miss .tag{color:var(--down)}
+.pr.pending{color:var(--faint)}
+.cnote{font-size:13px;color:var(--muted);margin:10px 0 0}
+.aw-scroll{overflow-x:auto;position:relative}
+.aw{width:100%;border-collapse:collapse;font-size:15px;min-width:480px}
+.aw th,.aw td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--rule)}
+.aw th:first-child,.aw td:first-child{padding-left:0}
+.aw thead th{font-size:13px;color:var(--muted);font-weight:600;border-bottom:2px solid var(--ink)}
+.aw tbody th{font-weight:700}
+.aw tr.hit td:nth-child(2){color:var(--up);font-weight:700}
+.aw .mark{text-align:right;font-weight:800;width:30px}
+.aw tr.hit .mark{color:var(--up)} .aw tr.miss .mark{color:var(--down)}
+.faint{color:var(--faint)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.legend{font-size:13px;color:var(--muted);margin-top:18px;display:flex;flex-wrap:wrap;gap:6px 16px;align-items:center}
+.lg{font-weight:700;color:var(--ink);padding-left:9px;border-left:5px solid}
+.lg.exact{border-color:var(--up)} .lg.near{border-color:var(--near)} .lg.in{border-color:var(--line-faint)} .lg.miss{border-color:var(--down)}
+.track{display:flex;flex-direction:column;border-top:2px solid var(--ink)}
+.trow{display:grid;grid-template-columns:96px 1fr 96px 86px 70px;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule)}
+.tyr{font-size:24px;font-weight:800;line-height:1}
+.tbar{position:relative;height:28px;background:var(--surface-2)}
+.tbar i{position:absolute;inset:0 auto 0 0;background:var(--paint)}
+.tbar span{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:800;line-height:1;color:#fff}
+.tstat b{display:block;font-size:22px;font-weight:800;line-height:1}
+.tstat span{font-size:12px;color:var(--muted)}
+
+/* ===== big board ===== */
+.chips button .ct{font-stretch:70%;font-weight:800;color:var(--faint);margin-left:2px}
+.chips button[aria-pressed="true"] .ct{color:var(--ink)}
+.posf{margin-bottom:22px}
+.bblist{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.bbrow{border-bottom:1px solid var(--rule)}
+.bbrow button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:52px minmax(0,1.6fr) 110px minmax(0,1fr);align-items:center;gap:16px;padding:10px 8px 10px 0}
+.bbrow button:hover{background:var(--surface)}
+.bbrow button:hover .bbn b{color:var(--paint)}
+.bbrow button:focus-visible{outline:2px solid var(--ball);outline-offset:-2px}
+.bbrow .rk{font-size:28px;color:var(--faint)}
+.bbrow.feat .rk{color:var(--ink);font-size:38px}
+.bbrow.r1 .rk{color:var(--ball)}
+.bbn{display:flex;flex-direction:column;gap:3px;min-width:0}
+.bbn b{font-size:16px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bbrow.feat .bbn b{font-size:20px;font-stretch:112%;font-weight:800}
+.bbmeta{display:flex;gap:12px;font-size:13px;color:var(--muted)}
+.pos{display:inline-flex;align-items:center;gap:5px;font-weight:700;color:var(--ink)}
+.pos i,.watch i{width:9px;height:9px;display:inline-block;flex:none}
+.bbsize{display:flex;align-items:baseline;gap:8px;justify-content:flex-end}
+.bbsize b{font-size:22px;font-weight:800;font-stretch:70%}
+.bbsize small{font-size:13px;color:var(--muted)}
+.bbnote{font-size:14px;color:var(--ink);font-style:italic;text-align:right}
+.bbrow:not(.feat) .bbnote{color:var(--muted)}
+.watch{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:3px}
+.watch button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:9px 1fr;column-gap:10px;align-items:center;padding:10px 12px;background:var(--surface);border:1px solid var(--border)}
+.watch button:hover{border-color:var(--ink)}
+.watch b{font-weight:700}
+.watch span{grid-column:2;font-size:13px;color:var(--muted)}
+#sizeChart{display:block;min-width:760px;width:100%;height:auto}
+#sizeChart text{font-family:var(--font)}
+#sizeChart .tick{font-size:12px;font-weight:700;font-stretch:70%;fill:var(--muted)}
+#sizeChart .plab{font-size:13px;font-weight:700;fill:var(--ink)}
+#sizeChart .grid{stroke:var(--rule)}
+#sizeChart .gmaj{stroke:var(--border)}
+#sizeChart .sq{cursor:pointer}
+#sizeChart .sq text{font-size:13px;font-weight:800;font-stretch:70%;fill:#fff}
+#sizeChart .sq:hover rect,#sizeChart .sq:focus rect{stroke:var(--ink);stroke-width:3}
+#sizeChart .sq:focus{outline:none}
+.schools{border-top:2px solid var(--ink)}
+.srow{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center;padding:14px 0;border-bottom:1px solid var(--rule)}
+.sname b{display:block;font-size:17px;font-weight:700}
+.sname span{font-size:13px;color:var(--muted)}
+.sq-row{display:flex;flex-wrap:wrap;gap:4px}
+.sq-row button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:stretch;background:var(--surface);border:1px solid var(--border)}
+.sq-row button b{display:grid;place-items:center;min-width:38px;padding:0 6px;background:var(--c);color:#fff;font-size:20px;font-weight:800;font-stretch:70%}
+.sq-row button.unr b{background:var(--surface-2);color:var(--muted)}
+.sq-row button span{padding:8px 12px;font-size:14px;font-weight:600}
+.sq-row button:hover{border-color:var(--ink)}
+.hist.pros td:nth-child(2){font-size:15px;font-weight:600;font-stretch:100%}
+.hero .path small{font-size:12px;font-weight:500;opacity:.8}
+.peers-h{font-size:14px;font-weight:700;margin:24px 0 8px}
+.peers{list-style:none;margin:0;padding:0;border-top:2px solid var(--ink)}
+.peers button{all:unset;box-sizing:border-box;cursor:pointer;width:100%;display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--rule);font-weight:600}
+.peers button b{font-size:20px;font-weight:800;font-stretch:70%;text-align:right}
+.peers button span{font-size:13px;color:var(--muted);font-weight:400}
+.peers button:hover{color:var(--paint)}
+.hist th[scope="row"]{border-bottom:1px solid var(--rule);color:var(--muted);font-size:14px}
+@media (max-width:760px){
+  .bbrow button{grid-template-columns:40px minmax(0,1fr) auto;gap:4px 12px}
+  .bbnote{grid-column:2/4;text-align:left;font-size:13px}
+  .bbnote:empty{display:none}
+  .bbrow.feat .rk{font-size:32px}
+  .srow{grid-template-columns:1fr;gap:8px}
+}
+
+@media (max-width:760px){
+  .wrap{padding:0 18px}
+  .board{grid-template-columns:1fr}
+  .board ol + ol li:first-child{border-top:0}
+  .movers{grid-template-columns:1fr}
+  .hero{padding:44px 0 40px}
+  .hero::after{opacity:.22}
+  .topbar .wrap{gap:12px}
+  .brand span{display:none}
+  .confs{grid-template-columns:1fr}
+  .psum{grid-template-columns:1fr 1fr}
+  .aw{min-width:0;font-size:14px}.aw th,.aw td{padding:9px 5px}
+  .trow{grid-template-columns:1fr 1fr 1fr;row-gap:10px}
+  .trow .tyr{grid-column:1/2}.trow .tbar{grid-column:2/4}
+  .yearbar{display:flex;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}
+  .yearbar button{padding:9px 12px;font-size:18px;flex:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ===== floorboard-aligned hero text: every line sits in one 42px plank ===== */
+.hero{padding:84px 0 42px}
+.hero h1{font-size:84px;line-height:84px;max-width:none}
+.hero p{margin:0;line-height:42px;font-size:18px;max-width:600px}
+.hero .path{margin-top:42px;gap:0 3px}
+.hero .path span{height:42px;padding:0 14px;align-items:center}
+
+/* ===== color: accent tokens that stay saturated in both themes ===== */
+:root{--blue:#1F4BA5;--orange:#E2581B;--band:#1B2F57}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--blue:#2B58B8;--orange:#E8662A;--band:#16223B}}
+:root[data-theme="dark"]{--blue:#2B58B8;--orange:#E8662A;--band:#16223B}
+
+/* section titles get a solid tab of color */
+section.block > h2::before{content:"";display:inline-block;width:.42em;height:.42em;background:var(--orange);margin-right:.32em;vertical-align:.08em}
+
+/* season / class pickers: active fills blue */
+.yearbar{border-color:var(--blue)}
+.yearbar button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.chips button[aria-pressed="true"]{background:var(--ink);color:var(--page);border-color:var(--ink)}
+.chips button[aria-pressed="true"] .ct{color:var(--page)}
+
+/* top-10 ranks become solid tiles, No. 1 in orange */
+.board li.top .rk,.bbrow.feat .rk{justify-self:end;display:grid;place-items:center;background:var(--blue);color:#fff;width:40px;height:34px;font-size:22px}
+.board li.top1 .rk,.bbrow.r1 .rk{background:var(--orange);color:#fff}
+.bbrow.feat .rk{width:46px;height:42px;font-size:26px}
+
+/* chart frames and list tops pick up the blue */
+.chart-scroll{border-top:4px solid var(--blue)}
+.board ol li:first-child,.bblist,.conf ol,.schools,.track,.aw thead th{border-top-color:var(--blue)}
+.bblist,.conf ol{border-top-width:3px}
+
+/* predictions: conference labels as solid tags, champion tile in orange */
+.conf h3{display:inline-block;background:var(--blue);color:#fff;padding:8px 12px;margin-bottom:0}
+.confs .conf:nth-child(2) h3{background:var(--orange)}
+.confs .conf:nth-child(2) ol{border-top-color:var(--orange)}
+.psum div:first-child{background:var(--blue);color:rgba(255,255,255,.8)}
+.psum div:first-child b{color:#fff}
+.psum div:last-child{background:var(--orange);color:rgba(255,255,255,.85)}
+.psum div:last-child b{color:#fff}
+.stats div:first-child{background:var(--orange);color:rgba(255,255,255,.85)}
+.stats div:first-child b{color:#fff}
+
+/* ===== full-bleed blue band for the last section on each page ===== */
+section.block.band{position:relative;isolation:isolate;margin-top:64px;padding:56px 0 64px;
+  --ink:#F4F6FA; --muted:#C3CCDB; --faint:#A3AEC1; --rule:rgba(255,255,255,.14);
+  --border:rgba(255,255,255,.35); --surface:rgba(255,255,255,.1); --surface-2:rgba(255,255,255,.14);
+  --up:#7FE0AE; --down:#FF9E90; --paint:#FFC9AE; --line-faint:rgba(255,255,255,.4); color:#fff}
+section.block.band::before{content:"";position:absolute;inset:0 calc(50% - 50vw);background:var(--band);z-index:-1;border-top:4px solid var(--orange)}
+.band h2::before{background:var(--orange)}
+.band .movers > div{border-top-color:#fff}
+.band .movers > div:nth-child(1){border-top-color:#7FE0AE}
+.band .movers > div:nth-child(2){border-top-color:#FF9E90}
+.band .tbar i{background:var(--orange)}
+.band .track,.band .schools{border-top-color:#fff}
+.band .sq-row button{border-color:rgba(255,255,255,.35)}
+.band .sq-row button b{box-shadow:inset 0 0 0 2px rgba(255,255,255,.55)}
+.band .sq-row button.unr b{background:rgba(255,255,255,.15);color:#fff}
+footer{margin-top:0}
+section.block:not(.band):last-of-type{padding-bottom:56px}
+
+@media (max-width:1000px){
+  .hero h1{font-size:64px;line-height:84px}
+}
+@media (max-width:760px){
+  .hero{padding:42px 0 42px}
+  .hero h1{font-size:40px;line-height:42px}
+  .hero p{font-size:16px;line-height:42px}
+  .hero p strong{display:block}
+}
+@media (max-width:420px){
+  .hero h1{font-size:34px}
+  .hero p{font-size:15px}
+}
+
+.back{display:flex;align-items:center;height:38px;padding:0 12px;border:1px solid #3A3F48;color:var(--bar-ink);text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;flex:none}
+.back:hover{border-color:var(--ball);color:#fff}
+@media (max-width:760px){.back{padding:0 9px;font-size:12px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap">
+    <div class="brand" aria-label="NBA Data Works">
+      <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="11.5" fill="var(--ball)"/><path d="M13 1.5v23M1.5 13h23M5 4.8c3.6 3 3.6 13.4 0 16.4M21 4.8c-3.6 3-3.6 13.4 0 16.4" stroke="var(--bar)" stroke-width="1.4" fill="none"/></svg>
+      <span>NBA Data Works</span>
+    </div>
+    <a class="back" href="https://jsk5892.github.io">← Portfolio</a>
+    <nav class="sections" id="nav" aria-label="Sections"></nav>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="panel" id="panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pName">
+  <header><h3 id="pName"></h3><button class="close" id="pClose" aria-label="Close player panel">✕</button></header>
+  <div class="body" id="pBody"></div>
+</aside>
+
+<script>
+/* ===== Data =====
+   Each future section gets its own key here (predictions, bigBoard, allTime).
+   rankings: year -> ordered list of names, index 0 = No. 1 */
+const DATA = {
+  rankings: {"2020": ["LeBron James", "Giannis Antetokounmpo", "Anthony Davis", "Kawhi Leonard", "Kevin Durant", "Stephen Curry", "Damian Lillard", "Luka Doncic", "James Harden", "Nikola Jokic", "Jimmy Butler", "Russell Westbrook"], "2021": ["Kevin Durant", "Giannis Antetokounmpo", "LeBron James", "Stephen Curry", "Luka Doncic", "Nikola Jokic", "Joel Embiid", "Kawhi Leonard", "Damian Lillard", "Anthony Davis", "Kyrie Irving", "James Harden", "Bradley Beal", "Chris Paul", "Devin Booker", "Jayson Tatum", "Paul George", "Trae Young", "Russell Westbrook", "Jimmy Butler", "Donovan Mitchell", "Zion Williamson", "Zach LaVine", "Julius Randle", "Rudy Gobert", "Khris Middleton", "Karl-Anthony Towns", "Jaylen Brown", "Jrue Holiday", "Brandon Ingram"], "2022": ["Giannis Antetokounmpo", "Kevin Durant", "LeBron James", "Stephen Curry", "Nikola Jokic", "Joel Embiid", "Luka Doncic", "Kawhi Leonard", "Ja Morant", "Jayson Tatum", "Devin Booker", "Jimmy Butler", "Paul George", "Trae Young", "Chris Paul", "DeMar DeRozan", "Donovan Mitchell", "Damian Lillard", "Anthony Davis", "Kyrie Irving", "Bradley Beal", "Zach LaVine", "James Harden", "Karl-Anthony Towns", "Rudy Gobert", "Zion Williamson", "Pascal Siakam", "Jaylen Brown", "Brandon Ingram", "Dejounte Murray", "Bam Adebayo", "Fred VanVleet", "Darius Garland", "Jrue Holiday", "Khris Middleton", "Shai Gilgeous-Alexander", "Jarrett Allen", "De'Aaron Fox", "Domantas Sabonis", "Andrew Wiggins"], "2023": ["Giannis Antetokounmpo", "Nikola Jokic", "Stephen Curry", "Kevin Durant", "Luka Doncic", "Joel Embiid", "LeBron James", "Jayson Tatum", "Jimmy Butler", "Damian Lillard", "Devin Booker", "Shai Gilgeous-Alexander", "Anthony Davis", "Kawhi Leonard", "Ja Morant", "Donovan Mitchell", "De'Aaron Fox", "Paul George", "Trae Young", "Kyrie Irving", "Jaylen Brown", "Bam Adebayo", "Domantas Sabonis", "Brandon Ingram", "Anthony Edwards", "Jamal Murray", "Tyrese Haliburton", "Jalen Brunson", "Zion Williamson", "Pascal Siakam"], "2024": ["Giannis Antetokounmpo", "Nikola Jokic", "Luka Doncic", "Kevin Durant", "Stephen Curry", "LeBron James", "Jayson Tatum", "Joel Embiid", "Shai Gilgeous-Alexander", "Anthony Davis", "Devin Booker", "Anthony Edwards", "Donovan Mitchell", "Jalen Brunson", "Kawhi Leonard", "Kyrie Irving", "Jimmy Butler", "Damian Lillard", "Jaylen Brown", "Bam Adebayo", "Victor Wembanyama", "Tyrese Haliburton", "Ja Morant", "De'Aaron Fox", "Trae Young", "Zion Williamson", "Karl-Anthony Towns", "Domantas Sabonis", "Tyrese Maxey", "DeMar DeRozan"], "2025": ["Nikola Jokic", "Giannis Antetokounmpo", "Luka Doncic", "Shai Gilgeous-Alexander", "Stephen Curry", "Kevin Durant", "Jayson Tatum", "Anthony Edwards", "Donovan Mitchell", "Victor Wembanyama", "Anthony Davis", "Jalen Brunson", "Tyrese Haliburton", "Devin Booker", "LeBron James", "Kawhi Leonard", "Cade Cunningham", "Kyrie Irving", "Paolo Banchero", "Bam Adebayo", "Tyrese Maxey", "Trae Young", "Jaylen Brown", "Jimmy Butler", "Karl-Anthony Towns", "Pascal Siakam", "Alperen Sengun", "Ja Morant", "Domantas Sabonis", "Jalen Williams"], "2026": ["Victor Wembanyama", "Nikola Jokic", "Luka Doncic", "Giannis Antetokounmpo", "Shai Gilgeous-Alexander", "Stephen Curry", "Anthony Edwards", "Jalen Brunson", "Kevin Durant", "Kawhi Leonard", "Jayson Tatum", "Cade Cunningham", "Donovan Mitchell", "LeBron James", "Jaylen Brown", "Tyrese Haliburton", "Devin Booker", "Tyrese Maxey", "Bam Adebayo", "Joel Embiid", "Kyrie Irving", "Paolo Banchero", "Scottie Barnes", "Jamal Murray", "Karl-Anthony Towns", "Pascal Siakam", "Anthony Davis", "Jalen Johnson", "Jimmy Butler", "Cooper Flagg"]},
+  predictions: [{"year": 2022, "west": ["Warriors", "Clippers", "Nuggets", "Mavericks", "Grizzlies", "Suns", "Lakers", "Timberwolves", "Pelicans"], "east": ["Bucks", "Celtics", "76ers", "Bulls", "Heat", "Nets", "Hawks", "Cavaliers", "Raptors"], "awards": {"MVP": "Embiid", "DPOY": "Bam Adebayo", "ROY": "Jabari Smith", "MIP": "Tyrese Haliburton", "6MOY": "Jordan Poole", "Coach": null}}, {"year": 2023, "west": ["Nuggets", "Lakers", "Warriors", "Clippers", "Suns", "Pelicans", "Timberwolves", "Thunder"], "east": ["Bucks", "Celtics", "Cavaliers", "Knicks", "Heat", "76ers", "Hawks", "Magic"], "awards": {"MVP": "Jayson Tatum", "DPOY": "Anthony Davis", "ROY": "Wemby", "MIP": "Gary Trent Jr.", "6MOY": "Josh Giddey", "Coach": null}}, {"year": 2024, "west": ["Thunder", "Nuggets", "Timberwolves", "Warriors", "Clippers", "Lakers", "Mavericks", "Suns"], "east": ["Celtics", "Bucks", "Knicks", "Cavaliers", "Heat", "76ers", "Hawks", "Pacers"], "awards": {"MVP": "Jokic", "DPOY": "Wemby", "ROY": "Stephon Castle", "MIP": "Jalen Suggs", "6MOY": "Naz Reid", "Coach": "Mark Daigneault"}}, {"year": 2025, "west": ["Nuggets", "Thunder", "Rockets", "Warriors", "Clippers", "Timberwolves", "Spurs", "Mavericks/Lakers"], "east": ["Knicks", "Cavaliers", "Magic", "76ers", "Hawks", "Pistons", "Bucks", "Raptors"], "awards": {"MVP": "Wemby", "DPOY": "Wemby", "ROY": "Cooper Flagg", "MIP": "Nembhard", "6MOY": "Lonzo", "Coach": "Magic"}}, {"year": 2026, "west": ["Thunder", "Spurs", "Nuggets", "Timberwolves", "Rockets", "Warriors", "Mavericks", "Trail Blazers"], "east": ["Knicks", "76ers", "Pacers", "Cavaliers", "Heat", "Raptors", "Celtics", "Wizards"], "awards": {"MVP": "Wemby", "DPOY": "Wemby", "ROY": "Caleb Wilson", "MIP": "Ausar Thompson", "6MOY": "Dylan Harper", "Coach": "Nick Nurse"}}],
+  bigBoard: {"classes": [{"year": 2026, "status": "final", "board": [{"n": "Darryn Peterson", "pos": "SG", "school": "Kansas", "ht": "6'5", "wt": 205, "note": "Primary Ballhandler"}, {"n": "AJ Dybantsa", "pos": "SF", "school": "BYU", "ht": "6'9", "wt": 210, "note": "Lead Wing"}, {"n": "Cam Boozer", "pos": "PF", "school": "Duke", "ht": "6'9", "wt": 250, "note": "Hybrid Big, Short Roll Demon"}, {"n": "Caleb Wilson", "pos": "PF", "school": "North Carolina", "ht": "6'10", "wt": 215, "note": "Lead Wing"}, {"n": "Kingston Flemings", "pos": "PG", "school": "Houston", "ht": "6'3", "wt": 190, "note": "Off Dribble Scorer"}, {"n": "Darius Acuff", "pos": "PG", "school": "Arkansas", "ht": "6'2", "wt": 190, "note": "Primary Ballhandler"}, {"n": "Keaton Wagler", "pos": "PG", "school": "Illinois", "ht": "6'6", "wt": 185, "note": "Primary Ballhandler"}, {"n": "Mikel Brown Jr.", "pos": "PG", "school": "Louisville", "ht": "6'5", "wt": 190, "note": "Off Dribble Scorer"}, {"n": "Yaxel Lendeborg", "pos": "SF", "school": "Michigan", "ht": "6'9", "wt": 235, "note": "Lead Wing"}, {"n": "Koa Peat", "pos": "PF", "school": "Arizona", "ht": "6'8", "wt": 235, "note": "Power Forward"}, {"n": "Brayden Burries", "pos": "SG", "school": "Arizona", "ht": "6'4", "wt": 205, "note": null}, {"n": "Bennett Stirtz", "pos": "PG", "school": "Iowa", "ht": "6'4", "wt": 190, "note": null}, {"n": "Dailyn Swain", "pos": "SF", "school": "Texas", "ht": "6'8", "wt": 220, "note": "Buckets"}, {"n": "Christian Anderson", "pos": "PG", "school": "Texas Tech", "ht": "6'3", "wt": 178, "note": null}, {"n": "Joshua Jefferson", "pos": "PF", "school": "Iowa State", "ht": "6'9", "wt": 240, "note": null}, {"n": "Cameron Carr", "pos": "SF", "school": "Baylor", "ht": "6'5", "wt": 175, "note": null}, {"n": "Morez Johnson", "pos": "PF", "school": "Michigan", "ht": "6'9", "wt": 235, "note": null}, {"n": "Labaron Philon", "pos": "SG", "school": "Alabama", "ht": "6'4", "wt": 175, "note": null}, {"n": "Ebuka Okorie", "pos": "PG", "school": "Stanford", "ht": "6'2", "wt": 185, "note": null}, {"n": "Chris Cenac Jr.", "pos": "PF", "school": "Houston", "ht": "6'11", "wt": 240, "note": null}, {"n": "Zuby Ejiofor", "pos": "PF", "school": "St. John's", "ht": "6'9", "wt": 245, "note": null}, {"n": "Jaron Pierre", "pos": "SG", "school": "SMU", "ht": "6'5", "wt": 210, "note": null}, {"n": "Isaiah Evans", "pos": "SF", "school": "Duke", "ht": "6'6", "wt": 180, "note": null}, {"n": "Meleek Thomas", "pos": "SG", "school": "Arkansas", "ht": "6'5", "wt": 185, "note": null}, {"n": "Hannes Steinbach", "pos": "C", "school": "Washington", "ht": "6'11", "wt": 220, "note": null}, {"n": "Tarris Reed Jr.", "pos": "C", "school": "UConn", "ht": "6'11", "wt": 265, "note": null}, {"n": "Trevon Brazile", "pos": "PF", "school": "Arkansas", "ht": "6'10", "wt": 226, "note": null}, {"n": "Allen Graves", "pos": "PF", "school": "Santa Clara", "ht": "6'9", "wt": 225, "note": null}, {"n": "Henri Veesar", "pos": "C", "school": "North Carolina", "ht": "7'0", "wt": 227, "note": null}, {"n": "Keyshawn Hall", "pos": "SF", "school": "Auburn", "ht": "6'7", "wt": 235, "note": null}]}, {"year": 2027, "status": "progress", "board": [{"n": "Alijah Arenas", "pos": "SG", "school": "USC", "ht": "6'6", "wt": 175, "note": "Scorer"}, {"n": "Tyler Tanner", "pos": "PG", "school": "Vanderbilt", "ht": "6'0", "wt": 173, "note": null}, {"n": "Thomas Haugh", "pos": "PF", "school": "Florida", "ht": "6'9", "wt": 215, "note": null}, {"n": "Tahaad Pettiford", "pos": "SG", "school": "Auburn", "ht": "6'1", "wt": 170, "note": null}, {"n": "Tounde Yessoufou", "pos": "SG", "school": "St. John's", "ht": "6'5", "wt": 215, "note": null}, {"n": "JT Toppin", "pos": "PF", "school": "Texas Tech", "ht": "6'9", "wt": 240, "note": null}, {"n": "Flory Bidunga", "pos": "C", "school": "Louisville", "ht": "6'10", "wt": 235, "note": "The Goat"}], "watch": [{"n": "Jordan Smith Jr.", "pos": "PG", "school": "Arkansas", "ht": null, "wt": null, "note": null}, {"n": "Caleb Holt", "pos": "SG", "school": "Arizona", "ht": null, "wt": null, "note": null}, {"n": "Jason Crowe", "pos": "SG", "school": "Missouri", "ht": null, "wt": null, "note": null}, {"n": "Tyran Stokes", "pos": "SG", "school": "Kansas", "ht": null, "wt": null, "note": null}, {"n": "Cameron Williams", "pos": "PF", "school": "Duke", "ht": null, "wt": null, "note": null}, {"n": "Anthony Thompson", "pos": "PF", "school": "Ohio State", "ht": null, "wt": null, "note": null}, {"n": "Deron Rippey Jr.", "pos": "PG", "school": "Duke", "ht": null, "wt": null, "note": null}, {"n": "Abdou Toure", "pos": "SF", "school": "Arkansas", "ht": null, "wt": null, "note": null}, {"n": "JJ Andrews", "pos": "SF", "school": "Arkansas", "ht": null, "wt": null, "note": null}, {"n": "Christian Collins", "pos": "SF", "school": "USC", "ht": null, "wt": null, "note": null}, {"n": "Bruce Branch", "pos": "SF", "school": "BYU", "ht": null, "wt": null, "note": null}, {"n": "Miles Sadler", "pos": "PG", "school": "West Virginia", "ht": null, "wt": null, "note": null}, {"n": "Brandon McCoy", "pos": "SG", "school": "Michigan", "ht": null, "wt": null, "note": null}, {"n": "Taylen Kinney", "pos": "PG", "school": "Kansas", "ht": null, "wt": null, "note": null}]}]},
+  allTime: null
+};
+
+/* ===== Section registry: add a view by flipping ready to true and giving it a render fn ===== */
+const SECTIONS = [
+  { id:"top30",       label:"Top 30",          ready:true,  render:renderTop30 },
+  { id:"predictions", label:"Predictions",     ready:true,  render:renderPredictions },
+  { id:"big-board",   label:"Draft Big Board", ready:true,  render:renderBigBoard },
+  { id:"all-time",    label:"All-Time Top 50", ready:false, blurb:"The 50 greatest players ever, with career numbers and how my list compares to the major outlets." }
+];
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const YEARS = Object.keys(DATA.rankings).map(Number).sort((a,b)=>a-b);
+const LATEST = YEARS[YEARS.length-1];
+const ordinal = n => n + (["th","st","nd","rd"][((n%100)-20)%10] || ["th","st","nd","rd"][n%100] || "th");
+
+/* rank lookup: rankOf[player][year] = rank */
+const rankOf = {};
+YEARS.forEach(y => DATA.rankings[y].forEach((p,i) => { (rankOf[p] ||= {})[y] = i+1; }));
+const listSize = y => DATA.rankings[y].length;
+
+function movement(p, y){
+  const prev = y-1;
+  if (!DATA.rankings[prev]) return {cls:"same", txt:"", title:"First year on record"};
+  const now = rankOf[p][y], before = rankOf[p][prev];
+  if (before == null){
+    if (listSize(prev) < 30) return {cls:"same", txt:"—", title:`${prev} list only ran ${listSize(prev)} deep`};
+    return {cls:"new", txt:"NEW", title:`Not ranked in ${prev}`};
+  }
+  const d = before - now;
+  if (d === 0) return {cls:"same", txt:"=", title:`Same as ${prev}`};
+  return d > 0 ? {cls:"up", txt:"▲"+d, title:`Up from ${before} in ${prev}`} : {cls:"down", txt:"▼"+(-d), title:`Down from ${before} in ${prev}`};
+}
+
+function playerStats(p){
+  const r = rankOf[p], ys = YEARS.filter(y => r[y] != null);
+  const vals = ys.map(y => r[y]);
+  const peak = Math.min(...vals);
+  const peakYears = ys.filter(y => r[y] === peak);
+  const avg = vals.reduce((a,b)=>a+b,0)/vals.length;
+  return { ys, peak, peakYears, avg, seasons: ys.length };
+}
+
+/* ===== Router ===== */
+function renderNav(active){
+  $("#nav").innerHTML = SECTIONS.map(s => s.ready
+    ? `<a href="#${s.id}" ${s.id===active?'aria-current="page"':''}>${s.label}</a>`
+    : `<a href="#${s.id}" class="soon" ${s.id===active?'aria-current="page"':''}>${s.label} <span>Soon</span></a>`).join("");
+}
+function route(){
+  const id = (location.hash.slice(1) || "top30");
+  const sec = SECTIONS.find(s => s.id === id) || SECTIONS[0];
+  renderNav(sec.id);
+  if (sec.ready) sec.render($("#view"));
+  else $("#view").innerHTML = `<div class="wrap placeholder"><h1>${sec.label}</h1><p>${sec.blurb}</p><p>This section is next on the build list. For now, head back to the <a href="#top30">Top 30</a>.</p></div>`;
+  document.title = `NBA Data Works · ${sec.label}`;
+}
+window.addEventListener("hashchange", route);
+
+/* ===== Top 30 view ===== */
+let currentYear = LATEST;
+const PALETTE = ["#E05A1F","#2456A6","#17855A","#8E3FB5","#C9A227","#D23C6E","#1C9AA8","#6B7C1F"];
+let selected = [];
+
+function renderTop30(root){
+  const no1 = DATA.rankings[LATEST][0];
+  const r1 = rankOf[no1];
+  const pathYears = YEARS.filter(y => r1[y] != null);
+  const firstTop = pathYears.find(y => r1[y] === 1);
+  const heroLine = firstTop === LATEST
+    ? `${no1.split(" ").slice(-1)[0]} takes the top spot.`
+    : `${no1.split(" ").slice(-1)[0]} holds the top spot.`;
+
+  root.innerHTML = `
+  <div class="wrap">
+    <section class="hero">
+      <h1>Joshua Kratt<br>NBA Top 30</h1>
+      <p><strong>${esc(heroLine)}</strong> My ranking of the league's best players, redrawn every season since ${YEARS[0]}. ${YEARS.length} lists, ${Object.keys(rankOf).length} players, and ${firstTop===LATEST?'a new':'the same'} No. 1 for ${LATEST}.</p>
+      <div class="path" aria-label="${esc(no1)} rank by year">
+        ${pathYears.map(y => `<span class="${y===LATEST?'now':''}">${y}<b>${r1[y]}</b></span>`).join("")}
+      </div>
+    </section>
+
+    <section class="block" id="board-sec">
+      <h2>The board</h2>
+      <p class="lede">Pick a season. Arrows show movement from the year before; tap any player for their full history.</p>
+      <div class="yearbar" role="group" aria-label="Season">
+        ${YEARS.map(y => `<button data-year="${y}" aria-pressed="${y===currentYear}">${y}</button>`).join("")}
+      </div>
+      <div id="boardOut"></div>
+    </section>
+
+    <section class="block">
+      <h2>Seven years, every line</h2>
+      <p class="lede">Each line is one player's rank from season to season. Pick names to trace them; gaps mean they fell outside the top 30 that year.</p>
+      <div class="chips" id="chips"></div>
+      <div class="chart-scroll"><svg id="bump" role="img" aria-label="Rank trajectories ${YEARS[0]} to ${LATEST}"></svg></div>
+      <p class="chart-tip">Tap a line to add or remove that player.</p>
+    </section>
+
+    <section class="block band">
+      <h2>Climbers, sliders, and staples</h2>
+      <p class="lede">The biggest one-year moves on the board, and the players who never left it.</p>
+      <div class="movers" id="movers"></div>
+    </section>
+  </div>
+  <footer><div class="wrap">
+    <p>Rankings are mine, set once per season. The ${YEARS[0]} list only went ${listSize(YEARS[0])} deep, so ${YEARS[0]+1} movement for anyone outside that group isn't shown. The ${YEARS.find(y=>listSize(y)>30) ?? ""} list ran to ${Math.max(...YEARS.map(listSize))}; ranks past 30 count toward movement but sit under "Also ranked."</p>
+  </div></footer>`;
+
+  root.querySelectorAll(".yearbar button").forEach(b => b.onclick = () => {
+    currentYear = +b.dataset.year;
+    root.querySelectorAll(".yearbar button").forEach(x => x.setAttribute("aria-pressed", x===b));
+    drawBoard();
+  });
+  if (!selected.length) selected = DATA.rankings[LATEST].slice(0,5);
+  drawBoard(); drawChips(); drawBump(); drawMovers();
+}
+
+function boardRows(list, offset){
+  return list.map((p,i) => {
+    const r = i+1+offset, m = movement(p, currentYear);
+    return `<li class="${r<=10?'top':''} ${r===1?'top1':''}"><button class="row" data-p="${esc(p)}">
+      <span class="rk">${r}</span><span class="nm">${esc(p)}</span>
+      <span class="mv ${m.cls}" title="${esc(m.title)}">${m.txt}</span></button></li>`;
+  }).join("");
+}
+function drawBoard(){
+  const list = DATA.rankings[currentYear];
+  const main = list.slice(0,30), extra = list.slice(30);
+  // two columns read top-to-bottom: split in half
+  const half = Math.ceil(main.length/2);
+  const prev = DATA.rankings[currentYear-1];
+  const dropped = prev ? prev.slice(0,30).filter(p => rankOf[p][currentYear] == null) : [];
+  let note = "";
+  if (main.length < 30) note = `<p class="board-note">This year's list only went ${main.length} deep.</p>`;
+  $("#boardOut").innerHTML = `${note}
+    <div class="board" style="display:grid">
+      <ol class="board" style="display:block">${boardRows(main.slice(0,half),0)}</ol>
+      <ol class="board" style="display:block">${boardRows(main.slice(half),half)}</ol>
+    </div>
+    ${extra.length ? `<details class="extra"><summary>Also ranked: ${31}–${30+extra.length}</summary><ol class="board" style="display:block">${boardRows(extra,30)}</ol></details>` : ""}
+    ${dropped.length ? `<p class="dropped"><b>Off the board from ${currentYear-1}:</b> ${dropped.map(p=>`<button data-p="${esc(p)}">${esc(p)}</button> (${rankOf[p][currentYear-1]})`).join(", ")}</p>` : ""}`;
+  $("#boardOut").querySelectorAll("[data-p]").forEach(b => b.onclick = () => openPlayer(b.dataset.p));
+}
+
+/* chips: every player who reached the top 10 at least once */
+function chipPlayers(){
+  return Object.keys(rankOf).filter(p => Object.values(rankOf[p]).some(r => r<=10))
+    .sort((a,b) => (rankOf[a][LATEST] ?? 99) - (rankOf[b][LATEST] ?? 99) || playerStats(a).avg - playerStats(b).avg);
+}
+const colorFor = p => PALETTE[selected.indexOf(p) % PALETTE.length];
+function toggle(p){
+  const i = selected.indexOf(p);
+  if (i>=0) selected.splice(i,1); else if (selected.length < PALETTE.length) selected.push(p); else { selected.shift(); selected.push(p); }
+  drawChips(); drawBump();
+}
+function drawChips(){
+  const c = $("#chips");
+  c.innerHTML = chipPlayers().map(p => {
+    const on = selected.includes(p);
+    return `<button data-p="${esc(p)}" aria-pressed="${on}"><i style="${on?`background:${colorFor(p)}`:''}"></i>${esc(p)}</button>`;
+  }).join("") + `<button class="clear" id="clearSel">Clear</button>`;
+  c.querySelectorAll("[data-p]").forEach(b => b.onclick = () => toggle(b.dataset.p));
+  $("#clearSel").onclick = () => { selected = []; drawChips(); drawBump(); };
+}
+
+function drawBump(){
+  const svg = $("#bump"), W = 1000, top = 48, rowH = 21, H = top + 30*rowH + 20;
+  const left = 150, right = 170, colW = (W-left-right)/(YEARS.length-1);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  const x = y => left + (y-YEARS[0])*colW, yy = r => top + (r-1)*rowH;
+  let g = "";
+  for (let r=1;r<=30;r++) g += `<line class="grid" x1="${left-14}" x2="${W-right+14}" y1="${yy(r)}" y2="${yy(r)}" stroke-dasharray="${r%5===0?'':'2 4'}"/><text class="rnum" x="${left-22}" y="${yy(r)+4}" text-anchor="end">${r}</text>`;
+  YEARS.forEach(y => g += `<text class="yr" x="${x(y)}" y="28" text-anchor="middle">${y}</text>`);
+
+  const seg = p => {
+    const r = rankOf[p]; let d = "", prevIn = false;
+    YEARS.forEach(y => {
+      const v = r[y];
+      if (v != null && v <= 30){ d += (prevIn ? "L" : "M") + x(y) + " " + yy(v) + " "; prevIn = true; }
+      else prevIn = false;
+    });
+    return d;
+  };
+  const players = Object.keys(rankOf);
+  const bg = players.filter(p => !selected.includes(p)).map(p => `<path class="ln bg" d="${seg(p)}" data-p="${esc(p)}"><title>${esc(p)}</title></path>`).join("");
+  let hl = "", dots = "", labels = "";
+  selected.forEach(p => {
+    const col = colorFor(p), r = rankOf[p];
+    hl += `<path class="ln hl" d="${seg(p)}" stroke="${col}" data-p="${esc(p)}"><title>${esc(p)}</title></path>`;
+    YEARS.forEach(y => { const v=r[y]; if (v!=null && v<=30) dots += `<circle cx="${x(y)}" cy="${yy(v)}" r="5" fill="${col}"><title>${esc(p)}: ${v} in ${y}</title></circle>`; });
+    const inYears = YEARS.filter(y => r[y]!=null && r[y]<=30);
+    if (inYears.length){
+      const last = inYears[inYears.length-1], first = inYears[0];
+      labels += `<text class="lab" x="${x(last)+12}" y="${yy(r[last])+4}" fill="${col}">${esc(p)}</text>`;
+      if (first !== last && first === YEARS[0]) labels += `<text class="lab" x="${x(first)-12}" y="${yy(r[first])+4}" fill="${col}" text-anchor="end">${esc(p.split(" ").slice(-1)[0])}</text>`;
+    }
+  });
+  // hit targets for faint lines
+  const hits = players.map(p => `<path class="hit" d="${seg(p)}" data-p="${esc(p)}"><title>${esc(p)}</title></path>`).join("");
+  svg.innerHTML = g + bg + hits + hl + dots + labels;
+  svg.querySelectorAll("[data-p]").forEach(el => el.addEventListener("click", () => toggle(el.dataset.p)));
+}
+
+function drawMovers(){
+  const jumps = [];
+  YEARS.slice(1).forEach(y => DATA.rankings[y].slice(0,30).forEach(p => {
+    const a = rankOf[p][y-1], b = rankOf[p][y];
+    if (a != null) jumps.push({p, y, from:a, to:b, d:a-b});
+  }));
+  const up = [...jumps].sort((a,b)=>b.d-a.d).slice(0,6);
+  const down = [...jumps].sort((a,b)=>a.d-b.d).slice(0,6);
+  const fullYears = YEARS.filter(y => listSize(y) >= 30);
+  const staples = Object.keys(rankOf).filter(p => fullYears.every(y => rankOf[p][y] != null && rankOf[p][y] <= 30))
+    .map(p => ({p, avg: fullYears.reduce((s,y)=>s+rankOf[p][y],0)/fullYears.length})).sort((a,b)=>a.avg-b.avg);
+  const li = (p, det) => `<li><button data-p="${esc(p)}"><span class="who">${esc(p)}</span><span class="det">${det}</span></button></li>`;
+  $("#movers").innerHTML = `
+    <div><h3>Biggest climbs</h3><p class="sub">Spots gained in a single season</p><ol>${up.map(j => li(j.p, `${j.from} → ${j.to} in ${j.y} <b style="color:var(--up)">+${j.d}</b>`)).join("")}</ol></div>
+    <div><h3>Steepest drops</h3><p class="sub">Spots lost in a single season</p><ol>${down.map(j => li(j.p, `${j.from} → ${j.to} in ${j.y} <b style="color:var(--down)">${j.d}</b>`)).join("")}</ol></div>
+    <div><h3>Never left</h3><p class="sub">Top 30 every season ${fullYears[0]}–${LATEST}, by average rank</p><ol>${staples.map(s => li(s.p, `avg <b>${s.avg.toFixed(1)}</b>`)).join("")}</ol></div>`;
+  $("#movers").querySelectorAll("[data-p]").forEach(b => b.onclick = () => openPlayer(b.dataset.p));
+}
+
+/* ===== Predictions ===== */
+const ACTUAL = {
+  2022:{ west:["Nuggets","Grizzlies","Kings","Suns","Clippers","Warriors","Lakers","Timberwolves"],
+         east:["Bucks","Celtics","76ers","Cavaliers","Knicks","Nets","Heat","Hawks"],
+         awards:{MVP:"Joel Embiid",DPOY:"Jaren Jackson Jr.",ROY:"Paolo Banchero",MIP:"Lauri Markkanen","6MOY":"Malcolm Brogdon",Coach:"Mike Brown"}, champ:"Nuggets" },
+  2023:{ west:["Thunder","Nuggets","Timberwolves","Clippers","Mavericks","Suns","Lakers","Pelicans"],
+         east:["Celtics","Knicks","Bucks","Cavaliers","Magic","Pacers","76ers","Heat"],
+         awards:{MVP:"Nikola Jokic",DPOY:"Rudy Gobert",ROY:"Victor Wembanyama",MIP:"Tyrese Maxey","6MOY":"Naz Reid",Coach:"Mark Daigneault"}, champ:"Celtics" },
+  2024:{ west:["Thunder","Rockets","Lakers","Nuggets","Clippers","Timberwolves","Warriors","Grizzlies"],
+         east:["Cavaliers","Celtics","Knicks","Pacers","Bucks","Pistons","Magic","Heat"],
+         awards:{MVP:"Shai Gilgeous-Alexander",DPOY:"Evan Mobley",ROY:"Stephon Castle",MIP:"Dyson Daniels","6MOY":"Payton Pritchard",Coach:"Kenny Atkinson"}, champ:"Thunder" },
+  2025:{ west:["Thunder","Spurs","Nuggets","Lakers","Rockets","Timberwolves","Trail Blazers","Suns"],
+         east:["Pistons","Celtics","Knicks","Cavaliers","Raptors","Hawks","76ers","Magic"],
+         awards:{MVP:"Shai Gilgeous-Alexander",DPOY:"Victor Wembanyama",ROY:"Cooper Flagg",MIP:"Nickeil Alexander-Walker","6MOY":"Keldon Johnson",Coach:"Joe Mazzulla"}, champ:"Knicks" }
+};
+const AWARD_NAMES = {MVP:"MVP",DPOY:"Defensive Player",ROY:"Rookie of the Year",MIP:"Most Improved","6MOY":"Sixth Man",Coach:"Coach of the Year"};
+/* nicknames in the sheet -> full names, used for matching and display */
+const ALIAS = {"Embiid":"Joel Embiid","Jokic":"Nikola Jokic","Wemby":"Victor Wembanyama","Nembhard":"Andrew Nembhard","Lonzo":"Lonzo Ball"};
+const fullName = n => n ? (ALIAS[n] || n) : null;
+const seasonLabel = y => `${y}–${String(y+1).slice(2)}`;
+const PRED_YEARS = DATA.predictions.map(s => s.year);
+const GRADED = PRED_YEARS.filter(y => ACTUAL[y]);
+let predYear = GRADED[GRADED.length-1];
+
+function gradeTeam(pick, seed, actual){
+  const opts = pick.split("/");
+  const seeds = opts.map(t => actual.indexOf(t)).filter(i => i>=0).map(i => i+1);
+  if (!seeds.length) return {tier:"miss", actual:null, pts:0};
+  const a = seeds.sort((x,y) => Math.abs(x-seed)-Math.abs(y-seed))[0], d = Math.abs(a-seed);
+  return d===0 ? {tier:"exact",actual:a,pts:3} : d<=2 ? {tier:"near",actual:a,pts:2} : {tier:"in",actual:a,pts:1};
+}
+function gradeSeason(s){
+  const A = ACTUAL[s.year]; if (!A) return null;
+  const confs = ["west","east"].map(c => s[c].slice(0,8).map((t,i) => ({team:t, seed:i+1, ...gradeTeam(t, i+1, A[c])})));
+  const all = confs.flat();
+  const awards = Object.keys(AWARD_NAMES).filter(k => s.awards[k]).map(k => ({k, pick:fullName(s.awards[k]), winner:A.awards[k], hit: fullName(s.awards[k]) === A.awards[k]}));
+  const pickedTeams = new Set(all.flatMap(r => r.team.split("/")));
+  const missedTeams = ["west","east"].map(c => A[c].filter(t => !s[c].slice(0,8).some(p => p.split("/").includes(t))));
+  return { confs, awards, missedTeams,
+    inCount: all.filter(r => r.tier!=="miss").length, exact: all.filter(r => r.tier==="exact").length,
+    pts: all.reduce((a,r)=>a+r.pts,0), awardHits: awards.filter(a=>a.hit).length, awardTotal: awards.length };
+}
+
+function renderPredictions(root){
+  const grades = GRADED.map(y => ({y, g: gradeSeason(DATA.predictions.find(s=>s.year===y))}));
+  const totIn = grades.reduce((a,x)=>a+x.g.inCount,0), totTeams = grades.length*16;
+  const totAw = grades.reduce((a,x)=>a+x.g.awardHits,0), totAwN = grades.reduce((a,x)=>a+x.g.awardTotal,0);
+  const pending = PRED_YEARS.filter(y => !ACTUAL[y]);
+  root.innerHTML = `
+  <div class="wrap">
+    <section class="hero">
+      <h1>Joshua Kratt<br>NBA Predictions</h1>
+      <p><strong>${totIn} of ${totTeams} playoff teams called so far.</strong> Every preseason I pick the eight playoff seeds in each conference and the six major awards. ${grades.length} seasons are graded against how they actually finished; ${pending.length ? `the ${pending.map(seasonLabel).join(", ")} picks are locked in and waiting.` : ""}</p>
+      <div class="path">
+        <span>Exact seeds<b>${grades.reduce((a,x)=>a+x.g.exact,0)}</b></span>
+        <span>Award winners<b>${totAw}/${totAwN}</b></span>
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>Season by season</h2>
+      <p class="lede">My preseason seeds on the left, where each team actually finished on the right. Seeds 7 and 8 count after the play-in.</p>
+      <div class="yearbar" role="group" aria-label="Season">
+        ${PRED_YEARS.map(y => `<button data-y="${y}" aria-pressed="${y===predYear}">${seasonLabel(y)}${ACTUAL[y]?"":" (live)"}</button>`).join("")}
+      </div>
+      <div id="predOut"></div>
+    </section>
+
+    <section class="block band">
+      <h2>The track record</h2>
+      <p class="lede">Points per season: 3 for an exact seed, 2 for within two spots, 1 for making the playoffs anywhere. A perfect season is 48.</p>
+      <div class="track" id="track"></div>
+    </section>
+  </div>
+  <footer><div class="wrap"><p>Results are final seeds after the play-in tournament and official NBA award winners. A pick of two teams ("Mavs/Lakers") counts whichever finished closer to the seed. Where the sheet has a nickname, it's matched to the player's full name.</p></div></footer>`;
+
+  root.querySelectorAll(".yearbar button").forEach(b => b.onclick = () => {
+    predYear = +b.dataset.y;
+    root.querySelectorAll(".yearbar button").forEach(x => x.setAttribute("aria-pressed", x===b));
+    drawSeason();
+  });
+  drawSeason();
+  const maxPts = 48;
+  $("#track").innerHTML = grades.map(({y,g}) => `
+    <div class="trow">
+      <div class="tyr">${seasonLabel(y)}</div>
+      <div class="tbar"><i style="width:${g.pts/maxPts*100}%"></i><span>${g.pts}</span></div>
+      <div class="tstat"><b>${g.inCount}/16</b><span>playoff teams</span></div>
+      <div class="tstat"><b>${g.exact}</b><span>exact seeds</span></div>
+      <div class="tstat"><b>${g.awardHits}/${g.awardTotal}</b><span>awards</span></div>
+    </div>`).join("");
+}
+
+const TIER_TXT = {exact:"Exact", near:"Close", in:"In", miss:"Missed"};
+function drawSeason(){
+  const s = DATA.predictions.find(x => x.year===predYear), A = ACTUAL[predYear], g = gradeSeason(s);
+  const conf = (c, title, ci) => {
+    const extra = s[c].slice(8);
+    const rows = s[c].slice(0,8).map((t,i) => {
+      if (!g) return `<li class="prow"><span class="ps">${i+1}</span><span class="pt">${esc(t)}</span><span class="pr pending">—</span></li>`;
+      const r = g.confs[ci][i];
+      return `<li class="prow ${r.tier}"><span class="ps">${i+1}</span><span class="pt">${esc(t)}</span>
+        <span class="pr"><span class="tag">${TIER_TXT[r.tier]}</span>${r.actual?`<b>${r.actual}</b>`:""}</span></li>`;
+    }).join("");
+    return `<div class="conf"><h3>${title}</h3><ol>${rows}</ol>
+      ${extra.length ? `<p class="cnote">Also listed: ${extra.map(esc).join(", ")}</p>` : ""}
+      ${g && g.missedTeams[ci].length ? `<p class="cnote">Made it without a pick: ${g.missedTeams[ci].map(t => `${esc(t)} (${A[c].indexOf(t)+1})`).join(", ")}</p>` : ""}</div>`;
+  };
+  const awardRows = Object.keys(AWARD_NAMES).map(k => {
+    const pick = fullName(s.awards[k]);
+    const win = A ? A.awards[k] : null;
+    const hit = A && pick && pick === win;
+    return `<tr class="${!A?'':(hit?'hit':(pick?'miss':''))}"><th scope="row">${AWARD_NAMES[k]}</th>
+      <td>${pick ? esc(pick) : '<span class="faint">No pick</span>'}</td>
+      <td>${A ? esc(win) : '<span class="faint">Season not played</span>'}</td>
+      <td class="mark">${!A || !pick ? "" : hit ? "✓" : "✗"}</td></tr>`;
+  }).join("");
+  const sum = g ? `<div class="psum">
+      <div><b>${g.inCount}/16</b><span>playoff teams picked</span></div>
+      <div><b>${g.exact}</b><span>exact seeds</span></div>
+      <div><b>${g.awardHits}/${g.awardTotal}</b><span>awards right</span></div>
+      <div><b>${A.champ}</b><span>won the title</span></div></div>`
+    : `<p class="board-note">The ${seasonLabel(predYear)} season hasn't been played yet. These picks get graded once it ends.</p>`;
+  $("#predOut").innerHTML = `${sum}
+    <div class="confs">${conf("west","West",0)}${conf("east","East",1)}</div>
+    <h3 class="awh">Awards</h3>
+    <div class="aw-scroll"><table class="aw"><thead><tr><th>Award</th><th>My pick</th><th>Winner</th><th><span class="sr">Result</span></th></tr></thead><tbody>${awardRows}</tbody></table></div>
+    ${g ? `<p class="legend"><span class="lg exact">Exact</span> right seed <span class="lg near">Close</span> within two seeds <span class="lg in">In</span> made playoffs elsewhere <span class="lg miss">Missed</span> didn't make it</p>` : ""}`;
+}
+
+/* ===== Draft Big Board =====
+   Not a mock draft: order = how highly I rate each prospect.
+   Add a class by appending to DATA.bigBoard.classes; status "progress" shows the watch list. */
+const BB = DATA.bigBoard;
+let bbYear = BB.classes[0].year, bbPos = "All";
+const POS = ["PG","SG","SF","PF","C"];
+const POS_NAME = {PG:"Point guard",SG:"Shooting guard",SF:"Small forward",PF:"Power forward",C:"Center"};
+const POS_COLOR = {PG:"#1F4BA5",SG:"#E2581B",SF:"#12804F",PF:"#8E3FB5",C:"#B88A12"};
+const htIn = h => { const m = h && String(h).match(/(\d+)'(\d+)/); return m ? +m[1]*12 + +m[2] : null; };
+const htFmt = h => h ? String(h).replace(/'(\d+)$/, "'$1\"") : "—";
+const lastName = n => n.replace(/ (Jr\.|Sr\.|II|III)$/,"").split(" ").slice(-1)[0];
+const bbClass = () => BB.classes.find(c => c.year === bbYear);
+
+function renderBigBoard(root){
+  const first = BB.classes[0], top = first.board[0];
+  const prog = BB.classes.filter(c => c.status === "progress");
+  root.innerHTML = `
+  <div class="wrap">
+    <section class="hero">
+      <h1>Joshua Kratt<br>NBA Big Board</h1>
+      <p><strong id="bbHead">${bbHeadline()}</strong> This is how highly I rate each prospect, not a guess at where they'll get picked. Team fit and draft order don't move anyone up or down.</p>
+      <div class="path">
+        ${BB.classes.map(c => `<span class="${c.year===bbYear?'now':''}">${c.year} class<b>${c.board.length}</b>${c.status==="progress"?`<small>ranked, ${c.watch.length} watching</small>`:"<small>ranked</small>"}</span>`).join("")}
+      </div>
+    </section>
+
+    <section class="block">
+      <h2>The board</h2>
+      <p class="lede">Ranked by how much I like the player. Tap a prospect for the full profile; filter by position to see how a group stacks up.</p>
+      <div class="yearbar" role="group" aria-label="Draft class">
+        ${BB.classes.map(c => `<button data-y="${c.year}" aria-pressed="${c.year===bbYear}">${c.year} class${c.status==="progress"?" (in progress)":""}</button>`).join("")}
+      </div>
+      <div class="chips posf" id="posf"></div>
+      <div id="bbOut"></div>
+    </section>
+
+    <section class="block">
+      <h2>Size profile</h2>
+      <p class="lede">Every ranked prospect by listed height, grouped by position. The number in each square is where they sit on my board.</p>
+      <div class="chart-scroll"><svg id="sizeChart" role="img"></svg></div>
+    </section>
+
+    <section class="block band">
+      <h2>Where they play</h2>
+      <p class="lede">Schools with more than one prospect on the board, with each player's rank.</p>
+      <div id="schools" class="schools"></div>
+    </section>
+  </div>
+  <footer><div class="wrap"><p>Heights and weights are listed measurements from the season, not combine numbers. Skill notes are mine and only filled in where I've written one.</p></div></footer>`;
+
+  root.querySelectorAll(".yearbar button").forEach(b => b.onclick = () => {
+    bbYear = +b.dataset.y; bbPos = "All";
+    root.querySelectorAll(".yearbar button").forEach(x => x.setAttribute("aria-pressed", x===b));
+    root.querySelectorAll(".hero .path span").forEach((s,i) => s.classList.toggle("now", BB.classes[i].year === bbYear));
+    $("#bbHead").textContent = bbHeadline();
+    drawBigBoard();
+  });
+  drawBigBoard();
+}
+function bbHeadline(){
+  const c = bbClass(), t = c.board[0];
+  return c.status === "progress" ? `${lastName(t.n)} leads the early ${c.year} board.` : `${lastName(t.n)} tops the ${c.year} board.`;
+}
+
+function drawBigBoard(){
+  const c = bbClass();
+  const counts = Object.fromEntries(POS.map(p => [p, c.board.filter(x => x.pos===p).length + (c.watch||[]).filter(x => x.pos===p).length]));
+  $("#posf").innerHTML = ["All", ...POS].map(p => `<button data-pos="${p}" aria-pressed="${p===bbPos}">${p==="All" ? "All positions" : `<i style="background:${POS_COLOR[p]}"></i>${p}`}<span class="ct">${p==="All" ? c.board.length + (c.watch||[]).length : counts[p]}</span></button>`).join("");
+  $("#posf").querySelectorAll("button").forEach(b => b.onclick = () => { bbPos = b.dataset.pos; drawBigBoard(); });
+
+  const show = p => bbPos === "All" || p.pos === bbPos;
+  const row = (p, rank) => `<li class="bbrow ${rank && rank<=10 ? 'feat' : ''} ${rank===1 ? 'r1' : ''}"><button data-n="${esc(p.n)}">
+      <span class="rk">${rank ?? ""}</span>
+      <span class="bbn"><b>${esc(p.n)}</b><span class="bbmeta"><span class="pos"><i style="background:${POS_COLOR[p.pos]||'var(--faint)'}"></i>${esc(p.pos||"")}</span><span>${esc(p.school||"")}</span></span></span>
+      <span class="bbsize">${p.ht ? `<b>${htFmt(p.ht)}</b>` : ""}${p.wt ? `<small>${p.wt} lb</small>` : ""}</span>
+      <span class="bbnote">${p.note ? esc(p.note) : ""}</span></button></li>`;
+  const ranked = c.board.map((p,i) => ({p, r:i+1})).filter(x => show(x.p));
+  let html = "";
+  if (c.status === "progress") html += `<p class="board-note">Still building this one. The first ${c.board.length} are in order; the watch list below isn't ranked yet.</p>`;
+  html += ranked.length ? `<ol class="bblist">${ranked.map(x => row(x.p, x.r)).join("")}</ol>` : `<p class="board-note">No ranked ${POS_NAME[bbPos].toLowerCase()}s in this class yet.</p>`;
+  if (c.watch && c.watch.length){
+    const w = c.watch.filter(show);
+    html += `<h3 class="awh">Watch list</h3><p class="lede">On my radar for ${c.year}, not ranked yet.</p>
+      ${w.length ? `<ul class="watch">${w.map(p => `<li><button data-n="${esc(p.n)}"><i style="background:${POS_COLOR[p.pos]||'var(--faint)'}"></i><b>${esc(p.n)}</b><span>${esc(p.pos||"")} ${p.school?`/ ${esc(p.school)}`:""}</span></button></li>`).join("")}</ul>` : `<p class="board-note">Nobody at this position yet.</p>`}`;
+  }
+  $("#bbOut").innerHTML = html;
+  $("#bbOut").querySelectorAll("[data-n]").forEach(b => b.onclick = () => openProspect(b.dataset.n));
+  drawSize(); drawSchools();
+}
+
+function drawSize(){
+  const c = bbClass(), svg = $("#sizeChart");
+  const pts = c.board.map((p,i) => ({p, r:i+1, h:htIn(p.ht)})).filter(x => x.h);
+  const lo = 72, hi = 85, W = 960, left = 150, right = 30, top = 40, step = 26;
+  const maxStack = pos => { const m = {}; pts.filter(t => t.p.pos===pos).forEach(t => m[t.h] = (m[t.h]||0)+1); return Math.max(1, ...Object.values(m)); };
+  const rowHs = POS.map(pos => Math.max(70, maxStack(pos)*step + 24));
+  const rowTop = POS.map((_,i) => top + rowHs.slice(0,i).reduce((a,b)=>a+b,0));
+  const H = top + rowHs.reduce((a,b)=>a+b,0) + 10;
+  const x = h => left + (h-lo)/(hi-lo)*(W-left-right);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("aria-label", `Heights of ranked ${c.year} prospects by position`);
+  let g = "";
+  for (let h=lo; h<=hi; h++){
+    g += `<line x1="${x(h)}" x2="${x(h)}" y1="${top-6}" y2="${H-10}" class="${h%12===0?'gmaj':'grid'}"/>`;
+    g += `<text x="${x(h)}" y="${top-14}" text-anchor="middle" class="tick">${Math.floor(h/12)}'${h%12}</text>`;
+  }
+  POS.forEach((pos, pi) => {
+    const cy = rowTop[pi] + rowHs[pi]/2;
+    g += `<line x1="0" x2="${W}" y1="${rowTop[pi]}" y2="${rowTop[pi]}" class="grid"/>`;
+    g += `<rect x="16" y="${cy-6}" width="12" height="12" fill="${POS_COLOR[pos]}"/><text x="36" y="${cy+5}" class="plab">${POS_NAME[pos]}</text>`;
+    const here = pts.filter(t => t.p.pos === pos);
+    const stack = {};
+    here.forEach(t => {
+      const k = t.h, n = (stack[k] = (stack[k]||0) + 1) - 1;
+      const tot = here.filter(o => o.h === k).length;
+      const cyy = cy + (n - (tot-1)/2) * step;
+      const dim = bbPos !== "All" && bbPos !== pos;
+      g += `<g class="sq" data-n="${esc(t.p.n)}" tabindex="0" role="button" aria-label="${esc(t.p.n)}, ranked ${t.r}, ${htFmt(t.p.ht)}" opacity="${dim?0.2:1}">
+        <rect x="${x(t.h)-12}" y="${cyy-12}" width="24" height="24" fill="${POS_COLOR[pos]}"/>
+        <text x="${x(t.h)}" y="${cyy+4.5}" text-anchor="middle">${t.r}</text><title>${esc(t.p.n)}: ${htFmt(t.p.ht)}, No. ${t.r}</title></g>`;
+    });
+  });
+  svg.innerHTML = g;
+  svg.querySelectorAll("[data-n]").forEach(el => {
+    el.addEventListener("click", () => openProspect(el.dataset.n));
+    el.addEventListener("keydown", e => { if (e.key==="Enter"||e.key===" "){ e.preventDefault(); openProspect(el.dataset.n); } });
+  });
+}
+
+function drawSchools(){
+  const c = bbClass(), by = {};
+  c.board.forEach((p,i) => p.school && (by[p.school] ||= []).push({p, r:i+1}));
+  (c.watch||[]).forEach(p => p.school && (by[p.school] ||= []).push({p, r:null}));
+  const list = Object.entries(by).filter(([,v]) => v.length > 1).sort((a,b) => b[1].length - a[1].length || Math.min(...a[1].map(x=>x.r??99)) - Math.min(...b[1].map(x=>x.r??99)));
+  $("#schools").innerHTML = list.length ? list.map(([s, v]) => `
+    <div class="srow"><div class="sname"><b>${esc(s)}</b><span>${v.length} prospects</span></div>
+    <div class="sq-row">${v.map(x => `<button class="${x.r?'':'unr'}" data-n="${esc(x.p.n)}" style="--c:${POS_COLOR[x.p.pos]||'var(--faint)'}" title="${esc(x.p.n)}"><b>${x.r ?? "–"}</b><span>${esc(lastName(x.p.n))}</span></button>`).join("")}</div></div>`).join("")
+    : `<p class="board-note">No school has more than one prospect yet.</p>`;
+  $("#schools").querySelectorAll("[data-n]").forEach(b => b.onclick = () => openProspect(b.dataset.n));
+}
+
+function openProspect(name){
+  lastFocus = document.activeElement;
+  const c = bbClass(), i = c.board.findIndex(p => p.n===name);
+  const p = i>=0 ? c.board[i] : c.watch.find(x => x.n===name), r = i>=0 ? i+1 : null;
+  $("#pName").textContent = p.n;
+  const peers = c.board.map((x,j) => ({x, r:j+1})).filter(o => o.x.pos===p.pos && o.x.n!==p.n);
+  $("#pBody").innerHTML = `
+    <div class="stats">
+      <div><b>${r ?? "—"}</b><span>${r ? `on my ${c.year} board` : "Watch list"}</span></div>
+      <div><b>${htFmt(p.ht)}</b><span>Height</span></div>
+      <div><b>${p.wt ?? "—"}</b><span>Weight (lb)</span></div>
+    </div>
+    <table class="hist pros"><tbody>
+      <tr><th scope="row">Position</th><td colspan="2" style="text-align:right">${POS_NAME[p.pos] || esc(p.pos||"—")}</td></tr>
+      <tr><th scope="row">School</th><td colspan="2" style="text-align:right">${esc(p.school||"—")}</td></tr>
+      <tr><th scope="row">Draft class</th><td colspan="2" style="text-align:right">${c.year}</td></tr>
+      <tr><th scope="row">My note</th><td colspan="2" style="text-align:right">${p.note ? esc(p.note) : '<span class="faint">None yet</span>'}</td></tr>
+    </tbody></table>
+    ${peers.length ? `<h4 class="peers-h">Other ${POS_NAME[p.pos].toLowerCase()}s on the board</h4><ul class="peers">${peers.map(o => `<li><button data-n="${esc(o.x.n)}"><b>${o.r}</b>${esc(o.x.n)}<span>${esc(o.x.school||"")}</span></button></li>`).join("")}</ul>` : ""}`;
+  $("#pBody").querySelectorAll("[data-n]").forEach(b => b.onclick = () => openProspect(b.dataset.n));
+  $("#panel").classList.add("open"); $("#scrim").classList.add("open");
+  $("#panel").setAttribute("aria-hidden","false"); $("#pClose").focus();
+}
+
+/* ===== Player panel ===== */
+let lastFocus = null;
+function openPlayer(p){
+  lastFocus = document.activeElement;
+  const s = playerStats(p), r = rankOf[p];
+  $("#pName").textContent = p;
+  // sparkline
+  const W=360,H=120,pad=24, maxR = Math.max(10, ...Object.values(r)) + 1;
+  const sx = y => pad + (y-YEARS[0])*(W-2*pad)/(YEARS.length-1), sy = v => 24 + (v-1)*(H-46)/(maxR-1);
+  let d="", prevIn=false, pts="", yl="";
+  YEARS.forEach(y => { const v=r[y]; yl += `<text x="${sx(y)}" y="${H-4}" text-anchor="middle">'${String(y).slice(2)}</text>`;
+    if (v!=null){ d += (prevIn?"L":"M")+sx(y)+" "+sy(v)+" "; prevIn=true; pts += `<circle cx="${sx(y)}" cy="${sy(v)}" r="4" fill="var(--ball)"/><text x="${sx(y)}" y="${sy(v)-8}" text-anchor="middle" style="fill:var(--ink)">${v}</text>`; } else prevIn=false; });
+  const spark = `<svg class="spark" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(p)} rank by year"><path d="${d}" fill="none" stroke="var(--ball)" stroke-width="2.5" stroke-linejoin="round"/>${pts}${yl}</svg>`;
+  const rows = YEARS.map(y => {
+    const v = r[y];
+    if (v == null) return `<tr><td>${y}</td><td style="color:var(--faint)">—</td><td style="color:var(--faint);font-size:13px">${listSize(y)<30?`list went ${listSize(y)} deep`:"unranked"}</td></tr>`;
+    const m = movement(p,y);
+    return `<tr><td>${y}</td><td>${v}</td><td><span class="mv ${m.cls}" title="${esc(m.title)}">${m.txt}</span></td></tr>`;
+  }).join("");
+  $("#pBody").innerHTML = `
+    <div class="stats">
+      <div><b>${s.peak}</b><span>Peak rank${s.peakYears.length>1?` (${s.peakYears.length}×)`:` (${s.peakYears[0]})`}</span></div>
+      <div><b>${s.avg.toFixed(1)}</b><span>Average rank</span></div>
+      <div><b>${s.seasons}/${YEARS.length}</b><span>Seasons ranked</span></div>
+    </div>
+    ${spark}
+    <table class="hist"><thead><tr><th>Season</th><th>Rank</th><th style="text-align:right">Change</th></tr></thead><tbody>${rows}</tbody></table>`;
+  $("#panel").classList.add("open"); $("#scrim").classList.add("open");
+  $("#panel").setAttribute("aria-hidden","false");
+  $("#pClose").focus();
+}
+function closePlayer(){
+  $("#panel").classList.remove("open"); $("#scrim").classList.remove("open");
+  $("#panel").setAttribute("aria-hidden","true");
+  if (lastFocus) lastFocus.focus();
+}
+$("#pClose").onclick = closePlayer; $("#scrim").onclick = closePlayer;
+document.addEventListener("keydown", e => { if (e.key==="Escape" && $("#panel").classList.contains("open")) closePlayer(); });
+
+route();
+</script>
+</body>
+</html>
